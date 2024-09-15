@@ -3,6 +3,8 @@ import { Table, Button, Modal, Checkbox, message, Input, Tag } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import API_BASE_URL from "../../constants.js";
+import axiosInstance from "../../Api/axiosConfig"; // Use the custom Axios instance
+import useRetryRequest from "../../Api/useRetryRequest"; // Import the retry hook
 
 const Vendors = () => {
   const [dataSource, setDataSource] = useState([]);
@@ -13,13 +15,17 @@ const Vendors = () => {
   const [email, setEmail] = useState("");
   const [isActive, setIsActive] = useState(false);
 
+  const retryRequest = useRetryRequest();
+
   useEffect(() => {
     fetchVendors();
   }, []);
 
   const fetchVendors = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/vendors`);
+      const response = await retryRequest(() =>
+        axiosInstance.get(`${API_BASE_URL}/admin/vendors`)
+      );
       const data = response.data.data.map((vendor) => ({
         key: vendor.Id,
         id: vendor.Id,
@@ -54,7 +60,7 @@ const Vendors = () => {
         allowCustomersToSelectPageSize: false,
         pageSizeOptions: "10,20,50",
       };
-      await axios.post(`${API_BASE_URL}/admin/create-vendors`, payload);
+      await axiosInstance.post(`${API_BASE_URL}/admin/create-vendors`, payload);
       message.success("Vendor added successfully");
       fetchVendors();
       setAddModal(false);
@@ -93,7 +99,7 @@ const Vendors = () => {
 
     if (Object.keys(payload).length > 0) {
       try {
-        await axios.patch(
+        await axiosInstance.patch(
           `${API_BASE_URL}/admin/editvendor/${selectedVendor.id}`,
           payload
         );
@@ -162,7 +168,7 @@ const Vendors = () => {
 
       {/*To Edit an already existing vendor*/}
       <Modal
-      centered
+        centered
         title="Edit Vendor"
         open={isModalVisible}
         onOk={handleOk}
@@ -192,7 +198,7 @@ const Vendors = () => {
 
       {/*To add a new vendor*/}
       <Modal
-      centered
+        centered
         title="Add Vendor"
         open={isAddModalVisible}
         onOk={addVendor}
