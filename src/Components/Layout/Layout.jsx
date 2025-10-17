@@ -8,6 +8,7 @@ const { Header, Sider, Footer, Content } = Layout;
 import logo from "/logo.png";
 
 import routeItems from "../RouteItems/RouteItems";
+import { usePermissions } from "../../Context/PermissionContext";
 
 const siderStyle = {
   overflow: "auto",
@@ -32,6 +33,9 @@ function debounce(func, wait) {
 }
 
 const CustomLayout = ({ pageTitle, menuKey, children }) => {
+  const { hasPermission, permissions, loading } = usePermissions();
+  console.log("Permissions in Layout:", permissions, loading, hasPermission);
+
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -47,7 +51,39 @@ const CustomLayout = ({ pageTitle, menuKey, children }) => {
   const [isSmallDevice, setSmallDevice] = useState(false);
 
   // Memoize menu items to avoid re-rendering
-  const menuItems = useMemo(() => routeItems, []);
+  const menuItems = useMemo(() => {
+    if (loading || !permissions) return [];
+
+    // Extract all permission system names for quick lookup
+    const userPermissions = permissions.map((p) => p.SystemName);
+
+    // Recursive function to filter menu items
+    const filterMenuItems = (items) => {
+      return items
+        .map((item) => {
+          // If it has children, filter them too
+          if (item.children) {
+            const filteredChildren = filterMenuItems(item.children);
+            // Only keep parent if any child is visible
+            if (filteredChildren.length > 0) {
+              return { ...item, children: filteredChildren };
+            }
+            return null;
+          }
+
+          // If no permission required, show it
+          if (!item.requiredPermission) return item;
+
+          // Otherwise, only show if user has the permission
+          if (userPermissions.includes(item.requiredPermission)) return item;
+
+          return null;
+        })
+        .filter(Boolean); // remove nulls
+    };
+
+    return filterMenuItems(routeItems);
+  }, [permissions, loading]);
 
   // Handle screen resizing and set small device state
   useEffect(() => {

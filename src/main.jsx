@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { AuthProvider } from "./Context/AuthContext/AuthContext.jsx";
 import { ConfigProvider } from "antd";
 import App from "./App.jsx";
+import { PermissionProvider } from "./Context/PermissionContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -29,7 +30,9 @@ createRoot(document.getElementById("root")).render(
       }}
     >
       <AuthProvider>
-        <App />
+        <PermissionProvider>
+          <App />
+        </PermissionProvider>
       </AuthProvider>
     </ConfigProvider>
   </StrictMode>
