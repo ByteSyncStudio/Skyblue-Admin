@@ -1,0 +1,56 @@
+/* Access Control List Styles */
+
+.acl-category-row {
+  background-color: #f5f5f5 !important;
+  font-weight: bold !important;
+}
+
+.acl-category-row td {
+  background-color: #f5f5f5 !important;
+  font-weight: 600 !important;
+  font-size: 14px;
+  color: #262626;
+  padding: 12px 16px !important;
+}
+
+/* Disable pointer events on category row checkboxes */
+.acl-category-row .ant-checkbox-wrapper {
+  display: none;
+}
+
+/* Table header styling */
+.ant-table-thead > tr > th {
+  background-color: #87ceeb;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ant-table-thead > tr > th:first-child {
+  text-align: left;
+}
+
+/* Center align checkboxes */
+.ant-table-cell .ant-checkbox-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Loading state for individual cells */
+.ant-checkbox-wrapper .ant-checkbox-disabled {
+  opacity: 0.5;
+}
+
+/* Hover effect for permission rows */
+.ant-table-tbody > tr:not(.acl-category-row):hover > td {
+  background-color: #fafafa !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
