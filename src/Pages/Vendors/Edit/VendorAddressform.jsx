@@ -67,7 +67,7 @@ const VendorAddressForm = () => {
 
   const handleSaveChanges = async (values) => {
     try {
-      await axiosInstance.patch(`${API_BASE_URL}/admin/update-vendor-address/${id}`, values);
+      await axiosInstance.patch(`${API_BASE_URL}/admin/vendor/update-vendor-address/${id}`, values);
       message.success("Address updated successfully");
     } catch (error) {
       console.error("Error updating address:", error);

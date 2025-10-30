@@ -90,7 +90,7 @@ const Vendors = () => {
         pageSizeOptions: "10,20,50",
       };
       console.log("Payload:", payload);
-      await axiosInstance.post(`${API_BASE_URL}/admin/create-vendors`, payload);
+      await axiosInstance.post(`${API_BASE_URL}/admin/vendor/create-vendors`, payload);
       message.success("Vendor added successfully");
       fetchVendors();
       setAddModal(false);

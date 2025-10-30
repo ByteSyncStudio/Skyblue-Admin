@@ -100,7 +100,7 @@ const EditVendor = () => {
 
     try {
       const response = await axiosInstance.patch(
-        `${API_BASE_URL}/admin/editvendor/${id}`,
+        `${API_BASE_URL}/admin/vendor/editvendor/${id}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -141,7 +141,7 @@ const EditVendor = () => {
   const handleDeleteCustomer = async (customerId) => {
     try {
       const response = await axiosInstance.patch(
-        `${API_BASE_URL}/admin/removecustomervendor`,
+        `${API_BASE_URL}/admin/vendor/removecustomervendor`,
         { customerId } // Sending customerId in request body
       );
 

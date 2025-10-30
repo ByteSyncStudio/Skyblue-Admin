@@ -42,7 +42,7 @@ const CustomerModal = ({ visible, onCancel, onSelectCustomer, vendorId }) => {
   const handleSelectCustomer = async (customer) => {
     try {
       const response = await retryRequest(() => axiosInstance.patch(
-        `${API_BASE_URL}/admin/addcustomertovendor/${vendorId}`,
+        `${API_BASE_URL}/admin/vendor/addcustomertovendor/${vendorId}`,
         { customerId: customer.Id }
       ));
       message.success("Customer added to vendor successfully.");

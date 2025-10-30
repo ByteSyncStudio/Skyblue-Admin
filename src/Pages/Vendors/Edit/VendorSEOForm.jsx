@@ -22,7 +22,7 @@ const fetchSeoData = async (vendorId, retryRequest) => {
 const saveSeoChanges = async (vendorId, updatedSEOData) => {
   try {
     const response = await axiosInstance.patch(
-      `${API_BASE_URL}/admin/editvendor/${vendorId}`,
+      `${API_BASE_URL}/admin/vendor/editvendor/${vendorId}`,
       updatedSEOData
     );
     return response.data.success;
