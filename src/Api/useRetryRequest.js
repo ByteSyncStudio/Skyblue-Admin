@@ -17,12 +17,16 @@ const useRetryRequest = () => {
         return response;
       } catch (error) {
         if (error.response) {
+          // 403 Permission Denied - don't logout, let axiosConfig show toast
           if (error.response.status === 403) {
-            logout();
-            navigate('/login');
-            console.error(`Forbidden access: ${error.response.status}`);
-            throw new Error(`Forbidden access: ${error.response.status}`);
+            console.warn(`Permission denied: ${error.response.status}`);
+            throw error; // Throw error but don't logout
           }
+          // 401 Unauthorized - handled by axiosConfig, will logout there
+          if (error.response.status === 401) {
+            throw error; // Let axiosConfig handle logout
+          }
+          // 404 or 500 - navigate to error page
           if (error.response.status === 404 || error.response.status === 500) {
             navigate('/500');
             console.error(`Server error: ${error.response.status}`);
@@ -32,9 +36,7 @@ const useRetryRequest = () => {
         attempt++;
         if (attempt >= retries) {
           console.error(`Failed after ${retries} attempts`);
-          logout();
-          navigate('/login');
-          throw error;
+          throw error; // Don't logout on retry failure
         }
         console.warn(`Retrying request, attempt: ${attempt}`);
       }

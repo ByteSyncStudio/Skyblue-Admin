@@ -43,6 +43,16 @@ export const hasAnyPermission = (userPermissions, requiredPermissions) => {
 /**
  * Filter menu items based on user permissions
  * Recursively filters menu items and their children
+ * 
+ * For parent items with children:
+ * - If parent has requiredPermissions array, check if user has ANY of those permissions
+ * - Show parent only if at least one child is visible after filtering
+ * 
+ * For child items:
+ * - requiredPermission: Check single permission
+ * - requiredPermissions + requireAll: true: User must have ALL permissions
+ * - requiredPermissions + requireAll: false/undefined: User needs ANY permission
+ * 
  * @param {Array} menuItems - Original menu structure
  * @param {Array} userPermissions - User's permissions
  * @returns {Array} Filtered menu items
@@ -64,6 +74,15 @@ export const filterMenuByPermissions = (menuItems, userPermissions) => {
           return null;
         }
         
+        // Check parent's permission requirements
+        // If parent has requiredPermissions array, check if user has ANY of them
+        if (item.requiredPermissions && Array.isArray(item.requiredPermissions)) {
+          const hasParentAccess = hasAnyPermission(userPermissions, item.requiredPermissions);
+          if (!hasParentAccess) {
+            return null;
+          }
+        }
+        
         return {
           ...item,
           children: filteredChildren,
@@ -71,11 +90,23 @@ export const filterMenuByPermissions = (menuItems, userPermissions) => {
       }
       
       // If no permission required, show it
-      if (!item.requiredPermission) {
+      if (!item.requiredPermission && !item.requiredPermissions) {
         return item;
       }
       
-      // Check if user has the required permission
+      // Handle requiredPermissions array (for items that need multiple permissions)
+      if (item.requiredPermissions && Array.isArray(item.requiredPermissions)) {
+        // If requireAll flag is set, user must have ALL permissions
+        if (item.requireAll) {
+          const hasAccess = hasAllPermissions(userPermissions, item.requiredPermissions);
+          return hasAccess ? item : null;
+        }
+        // Otherwise, user needs ANY of the permissions
+        const hasAccess = hasAnyPermission(userPermissions, item.requiredPermissions);
+        return hasAccess ? item : null;
+      }
+      
+      // Check if user has the required permission (single permission)
       const hasAccess = hasPermission(userPermissions, item.requiredPermission);
       
       // Only return item if user has access

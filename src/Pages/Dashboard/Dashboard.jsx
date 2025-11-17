@@ -45,13 +45,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        const [
-          dashboardStatsResponse,
-          orderStatsResponse,
-          ordersResponse,
-          bestSellersResponse,
-          bestSellersByAmountResponse,
-        ] = await Promise.all([
+        // Fetch all data, but handle individual failures gracefully
+        const results = await Promise.allSettled([
           retryRequest(() => axiosInstance.get("/admin/stats")),
           retryRequest(() => axiosInstance.get("/admin/orderStats")),
           retryRequest(() => axiosInstance.get(`/admin/all-orders?size=20`)),
@@ -59,33 +54,59 @@ const Dashboard = () => {
           retryRequest(() => axiosInstance.get("/admin/bestSellerByAmount")),
         ]);
 
-        // Process and set the data
-        setDashboardStats(dashboardStatsResponse.data);
-        setOrderStats(orderStatsResponse.data.data);
+        // Process stats if successful
+        if (results[0].status === "fulfilled") {
+          setDashboardStats(results[0].value.data);
+        } else {
+          console.warn("Failed to load dashboard stats:", results[0].reason);
+        }
 
-        const data = ordersResponse.data.data.map((order) => ({
-          key: order.Id,
-          id: order.Id,
-          orderStatus: order.OrderStatusId,
-          orderNo: order.Id,
-          customer: order.CustomerEmail,
-          createdOn: new Date(order.CreatedonUtc).toLocaleString("en-US", {
-            month: "numeric",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            second: "numeric",
-            hour12: true,
-          }),
-          orderTotal: "$" + order.OrderTotal.toFixed(2),
-        }));
-        setOrders(data);
+        // Process order stats if successful
+        if (results[1].status === "fulfilled") {
+          setOrderStats(results[1].value.data.data);
+        } else {
+          console.warn("Failed to load order stats:", results[1].reason);
+        }
 
-        setBestSellerByQuantity(bestSellersResponse.data);
-        setBestSellerByAmount(bestSellersByAmountResponse.data);
+        // Process orders if successful
+        if (results[2].status === "fulfilled") {
+          const data = results[2].value.data.data.map((order) => ({
+            key: order.Id,
+            id: order.Id,
+            orderStatus: order.OrderStatusId,
+            orderNo: order.Id,
+            customer: order.CustomerEmail,
+            createdOn: new Date(order.CreatedonUtc).toLocaleString("en-US", {
+              month: "numeric",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+              second: "numeric",
+              hour12: true,
+            }),
+            orderTotal: "$" + order.OrderTotal.toFixed(2),
+          }));
+          setOrders(data);
+        } else {
+          console.warn("Failed to load orders:", results[2].reason);
+        }
+
+        // Process best sellers by quantity if successful
+        if (results[3].status === "fulfilled") {
+          setBestSellerByQuantity(results[3].value.data);
+        } else {
+          console.warn("Failed to load best sellers by quantity:", results[3].reason);
+        }
+
+        // Process best sellers by amount if successful
+        if (results[4].status === "fulfilled") {
+          setBestSellerByAmount(results[4].value.data);
+        } else {
+          console.warn("Failed to load best sellers by amount:", results[4].reason);
+        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Unexpected error fetching dashboard data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -108,33 +129,35 @@ const Dashboard = () => {
 
         setMonthlyOrder(orderChartData);
       } catch (error) {
-        console.error("Error fetching New Orders:", error);
-        message.error("Failed to fetching New Orders");
+        console.warn("Failed to load order chart data:", error);
+        // Don't show error message to user, just log it
+        // The chart will show empty state
       }
     };
 
     fetchOrderChart(orderChartState);
-  }, [orderChartState]);
+  }, [orderChartState, retryRequest]);
 
   useEffect(() => {
     const fetchNewCustomer = async (state) => {
       try {
         const response = await retryRequest(() =>
-          axiosInstance.get(`/admin/past-customers?period=${state}`)
+          axiosInstance.get(`/admin/monthly-customers?period=${state}`)
         );
-        const customerChartData = response.data.map((item) => ({
+        const newCustomersData = response.data.map((item) => ({
           day: item.month || item.date,
-          Customers: item.orders,
+          Customers: item.customers,
         }));
-        setNewCustomers(customerChartData);
+        setNewCustomers(newCustomersData);
       } catch (error) {
-        console.error("Error fetching New Customers:", error);
-        message.error("Failed to fetching New Customers");
+        console.warn("Failed to load new customers data:", error);
+        // Don't show error message to user, just log it
+        // The chart will show empty state
       }
     };
 
     fetchNewCustomer(newCustomersState);
-  }, [newCustomersState]);
+  }, [newCustomersState, retryRequest]);
 
   return (
     <>

@@ -40,18 +40,39 @@ export const setupInterceptors = (token) => {
 
         // Handle 403 Permission Denied
         if (status === 403) {
+          // Verbose logging for debugging
+          console.group("🚫 Permission Denied");
+          console.error("URL:", error.config?.url);
+          console.error("Method:", error.config?.method?.toUpperCase());
+          console.error("Message:", data.message);
+          console.error("Required Permission:", data.requiredPermission || "Not specified");
+          console.error("Error Code:", data.code);
+          console.error("Full Response:", data);
+          console.groupEnd();
+
           message.error({
-            content: `⛔ ${data.message || "You don't have permission to perform this action"}`,
-            duration: 4,
+            content: `🚫 Access Denied: ${data.message || "You don't have permission to perform this action"}`,
+            duration: 5,
             style: {
               marginTop: "20vh",
+              fontSize: "16px",
             },
+            className: "permission-denied-toast",
           });
         }
 
         // Handle 401 Unauthorized
         else if (status === 401) {
-          message.error("Session expired. Please login again.");
+          console.warn("⚠️ 401 Unauthorized - Session expired or invalid token");
+          console.warn("URL:", error.config?.url);
+          
+          message.warning({
+            content: "⚠️ Session expired. Please login again.",
+            duration: 4,
+            style: {
+              marginTop: "20vh",
+            },
+          });
           localStorage.removeItem("token");
           localStorage.removeItem("user_permissions");
           window.location.href = "/login";
@@ -59,11 +80,24 @@ export const setupInterceptors = (token) => {
 
         // Handle server errors
         else if (status >= 500) {
-          message.error("Server error. Please try again later.");
+          console.error("❌ Server Error:", status);
+          console.error("URL:", error.config?.url);
+          console.error("Details:", data);
+          
+          message.error({
+            content: "⚠️ Server error. Please try again later.",
+            duration: 4,
+          });
         }
       } else if (error.request) {
         // Network error
-        message.error("Network error. Please check your connection.");
+        console.error("📡 Network Error - No response received");
+        console.error("URL:", error.config?.url);
+        
+        message.error({
+          content: "📡 Network error. Please check your connection.",
+          duration: 4,
+        });
       }
 
       return Promise.reject(error);

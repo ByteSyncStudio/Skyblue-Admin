@@ -34,7 +34,8 @@ const routeItems = [
   {
     key: "sub1", 
     icon: <ProductOutlined />,
-    label: "Catalog", 
+    label: "Catalog",
+    requiredPermissions: ["ManageProducts", "ManageCategories", "ManageManufacturers", "ManageAttributes"], // Show if user has ANY
     children: [ 
       {
         key: "2",
@@ -46,7 +47,8 @@ const routeItems = [
         key: "3",
         icon: <CustomerServiceOutlined />,
         label: <Link to="/products">Products</Link>,
-        requiredPermission: "ManageProducts",
+        requiredPermissions: ["ManageProducts", "ManageCategories", "ManageManufacturers", "ManageVendors"], // Needs ALL these permissions
+        requireAll: true, // Must have ALL permissions (not just ANY)
       },
       {
         key: "4",
@@ -58,6 +60,7 @@ const routeItems = [
         key: "5",
         icon: <PicRightOutlined />,
         label: <Link to="/inventory">Inventory</Link>,
+        requiredPermission: "ManageProducts",
       },
       {
         key: "23",
@@ -71,7 +74,8 @@ const routeItems = [
   {
     key: "sub6", 
     icon: <ShopOutlined />,
-    label: "Vendor Orders", 
+    label: "Vendor Orders",
+    requiredPermissions: ["ManageVendors"],
     children: [ 
       {
         key: "6",
@@ -83,6 +87,8 @@ const routeItems = [
         key: "20",
         icon: <EditOutlined />,
         label: <Link to="/bulk-edit">Bulk Edit</Link>,
+        requiredPermissions: ["ManageProducts", "ManageVendors", "ManageManufacturers", "ManageCategories"],
+        requireAll: true, // Must have ALL permissions
       },
     ],
   },
@@ -90,6 +96,7 @@ const routeItems = [
     key: "sub2",
     icon: <ShoppingCartOutlined />,
     label: "Sales",
+    requiredPermissions: ["ManageOrders", "ManageCurrentCarts"],
     children: [
       {
         key: "7",
@@ -107,6 +114,7 @@ const routeItems = [
         key: "9",
         icon: <StarOutlined />,
         label: <Link to="/best-seller">Best Seller</Link>,
+        requiredPermission: "AccessAdminPanel",
       },
     ],
   },
@@ -114,6 +122,7 @@ const routeItems = [
     key: "sub3",
     icon: <UserOutlined />,
     label: "Customers",
+    requiredPermissions: ["ManageCustomers"],
     children: [
       {
         key: "10",
@@ -146,6 +155,7 @@ const routeItems = [
     key: "sub4",
     icon: <TagOutlined />,
     label: "Promotions",
+    requiredPermissions: ["ManageDiscounts", "ManageCampaigns"],
     children: [
       {
         key: "14",
@@ -177,16 +187,19 @@ const routeItems = [
     key: "sub5",
     icon: <PictureOutlined />,
     label: "Content Management",
+    requiredPermissions: ["ManageWidgets"],
     children: [
       {
         key: "18",
         icon: <NotificationOutlined />,
         label: <Link to="/notice">Notice</Link>,
+        requiredPermission: "ManageWidgets",
       },
       {
         key: "19",
         icon: <PictureOutlined />,
         label: <Link to="/banners">Banners</Link>,
+        requiredPermission: "ManageWidgets",
       },
     ],
   },
@@ -194,12 +207,13 @@ const routeItems = [
     key: "sub7",
     icon: <SettingOutlined />,
     label: "Configuration",
+    requiredPermissions: ["ManageShippingSettings", "ManageACL"],
     children: [
       {
         key: "21",
         icon: <CarOutlined />,
         label: <Link to="/shipping-methods">Shipping Methods</Link>,
-        requiredPermission: "ManagePaymentMethods",
+        requiredPermission: "ManageShippingSettings",
       },
       {
         key: "22",
