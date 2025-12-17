@@ -68,7 +68,7 @@ export const PermissionProvider = ({ children }) => {
   const hasPermission = useCallback(
     (systemName) => {
       if (!Array.isArray(permissions)) return false;
-      return permissions.some((p) => p.SystemName === systemName);
+      return permissions.includes(systemName);
     },
     [permissions]
   );
@@ -77,9 +77,7 @@ export const PermissionProvider = ({ children }) => {
   const hasAnyPermission = useCallback(
     (systemNames) => {
       if (!Array.isArray(permissions) || !Array.isArray(systemNames)) return false;
-      return systemNames.some((systemName) =>
-        permissions.some((p) => p.SystemName === systemName)
-      );
+      return systemNames.some((systemName) => permissions.includes(systemName));
     },
     [permissions]
   );
@@ -88,9 +86,7 @@ export const PermissionProvider = ({ children }) => {
   const hasAllPermissions = useCallback(
     (systemNames) => {
       if (!Array.isArray(permissions) || !Array.isArray(systemNames)) return false;
-      return systemNames.every((systemName) =>
-        permissions.some((p) => p.SystemName === systemName)
-      );
+      return systemNames.every((systemName) => permissions.includes(systemName));
     },
     [permissions]
   );
