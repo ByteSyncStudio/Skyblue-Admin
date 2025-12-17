@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user_permissions"); // Clear permissions on logout
     setToken(null);
     setupInterceptors(null); // Remove Authorization header by sending `null`
   };

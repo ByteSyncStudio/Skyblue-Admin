@@ -33,7 +33,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isLoggedIn()) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [contextToken, navigate]);
 

@@ -1,19 +1,22 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import axiosInstance from "../Api/axiosConfig";
 import API_BASE_URL from "../constants";
+import { AuthContext } from "./AuthContext/AuthContext";
 
 const PermissionContext = createContext();
 
 export const PermissionProvider = ({ children }) => {
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const token = localStorage.getItem("token");
+  const { token } = useContext(AuthContext);
 
   // ✅ Helper to fetch user permissions from new ACL API
   const fetchPermissions = useCallback(async () => {
-    if (!token) {
+    const authToken = token || localStorage.getItem("token");
+    
+    if (!authToken) {
       setLoading(false);
+      setPermissions([]);
       return;
     }
     
@@ -21,12 +24,13 @@ export const PermissionProvider = ({ children }) => {
     try {
       const response = await axiosInstance.get(`${API_BASE_URL}/admin/acl/my-permissions`, {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${authToken}`
         }
       });
 
       if (response.data.success) {
-        const permissionData = response.data.permissions || [];
+        // Use permissionsDetail which has the full object structure with SystemName
+        const permissionData = response.data.permissionsDetail || [];
         setPermissions(permissionData);
         localStorage.setItem("user_permissions", JSON.stringify(permissionData));
       }
@@ -48,27 +52,35 @@ export const PermissionProvider = ({ children }) => {
     }
   }, [token]);
 
-  // ✅ Load permissions (from cache or API)
+  // ✅ Load permissions on mount and when token changes
   useEffect(() => {
+    const authToken = token || localStorage.getItem("token");
     const cachedPermissions = localStorage.getItem("user_permissions");
-    if (cachedPermissions) {
+    
+    // If we have cached permissions, load them immediately for fast UI render
+    if (cachedPermissions && authToken) {
       try {
         setPermissions(JSON.parse(cachedPermissions));
         setLoading(false);
       } catch (error) {
         console.error("Failed to parse cached permissions:", error);
-        fetchPermissions();
       }
-    } else {
-      fetchPermissions();
     }
-  }, [fetchPermissions]);
+    
+    // Always fetch fresh permissions if we have a token
+    if (authToken) {
+      fetchPermissions();
+    } else {
+      setLoading(false);
+      setPermissions([]);
+    }
+  }, [token, fetchPermissions]);
 
   // ✅ Helper function to check permission by SystemName
   const hasPermission = useCallback(
     (systemName) => {
       if (!Array.isArray(permissions)) return false;
-      return permissions.includes(systemName);
+      return permissions.some((p) => p.SystemName === systemName);
     },
     [permissions]
   );
@@ -77,7 +89,9 @@ export const PermissionProvider = ({ children }) => {
   const hasAnyPermission = useCallback(
     (systemNames) => {
       if (!Array.isArray(permissions) || !Array.isArray(systemNames)) return false;
-      return systemNames.some((systemName) => permissions.includes(systemName));
+      return systemNames.some((systemName) =>
+        permissions.some((p) => p.SystemName === systemName)
+      );
     },
     [permissions]
   );
@@ -86,7 +100,9 @@ export const PermissionProvider = ({ children }) => {
   const hasAllPermissions = useCallback(
     (systemNames) => {
       if (!Array.isArray(permissions) || !Array.isArray(systemNames)) return false;
-      return systemNames.every((systemName) => permissions.includes(systemName));
+      return systemNames.every((systemName) =>
+        permissions.some((p) => p.SystemName === systemName)
+      );
     },
     [permissions]
   );

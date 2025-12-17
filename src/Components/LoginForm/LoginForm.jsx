@@ -44,7 +44,7 @@ const LoginForm = () => {
       if (response.status === 200) {
         const { token } = response.data;
         login(token, formData.rememberMe);
-        navigate("/"); // Navigate to a protected route
+        navigate("/dashboard"); // Navigate to a protected route
       } else {
         console.error("Login failed with status code:", response.status);
         setAlert({
