@@ -19,7 +19,11 @@ export const PermissionProvider = ({ children }) => {
     
     setLoading(true);
     try {
-      const response = await axiosInstance.get(`${API_BASE_URL}/admin/acl/my-permissions`);
+      const response = await axiosInstance.get(`${API_BASE_URL}/admin/acl/my-permissions`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
       if (response.data.success) {
         const permissionData = response.data.permissions || [];
