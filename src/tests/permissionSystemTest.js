@@ -16,7 +16,7 @@ if (cachedPerms) {
 
 // Test 2: Check utility functions
 console.log('\n=== Test 2: Utility Functions ===');
-import { hasPermission, hasAnyPermission, hasAllPermissions, filterMenuByPermissions } from './src/utils/permissions.js';
+import { hasPermission, hasAnyPermission, hasAllPermissions, filterMenuByPermissions } from '../utils/permissions.js';
 
 const mockPermissions = [
   { SystemName: 'AccessAdminPanel' },
